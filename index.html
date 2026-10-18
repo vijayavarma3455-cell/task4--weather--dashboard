@@ -3,32 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My To-Do List</title>
+    <title>Weather Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>My To-Do List</h1>
+        <h1>Weather Dashboard</h1>
+        <p>Check the current weather of any city</p>
 
-        <div class="input-section">
-            <input
-                type="text"
-                id="taskInput"
-                placeholder="Enter your task..."
-            >
-            <button id="addBtn">Add Task</button>
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Enter city name">
+            <button id="searchBtn">Search</button>
         </div>
 
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="active">Active</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
+        <p id="message"></p>
+
+        <div id="weatherCard" class="weather-card" hidden>
+            <h2 id="cityName"></h2>
+            <h3 id="description"></h3>
+            <div id="weatherIcon"></div>
+
+            <div class="weather-details">
+                <div class="detail">
+                    <span>Temperature</span>
+                    <strong id="temperature"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Feels Like</span>
+                    <strong id="feelsLike"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Humidity</span>
+                    <strong id="humidity"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Wind Speed</span>
+                    <strong id="windSpeed"></strong>
+                </div>
+            </div>
         </div>
-
-        <ul id="taskList"></ul>
-
-        <p id="taskCount">0 tasks remaining</p>
     </div>
 
     <script src="script.js"></script>
