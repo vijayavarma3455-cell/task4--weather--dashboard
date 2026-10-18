@@ -1,201 +1,124 @@
-// 1. Get the HTML elements
-const taskInput = document.getElementById("taskInput");
-const addBtn = document.getElementById("addBtn");
-const taskList = document.getElementById("taskList");
-const taskCount = document.getElementById("taskCount");
-const filterButtons = document.querySelectorAll(".filter-btn");
+const cityInput = document.getElementById("cityInput");
+const searchBtn = document.getElementById("searchBtn");
+const message = document.getElementById("message");
+const weatherCard = document.getElementById("weatherCard");
 
-// 2. Load saved tasks from localStorage
-let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+searchBtn.addEventListener("click", getWeather);
 
-// 3. Set the current filter
-let currentFilter = "all";
-
-// 4. Save tasks to localStorage
-function saveTasks() {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-// 5. Display tasks on the webpage
-function renderTasks() {
-    taskList.innerHTML = "";
-
-    const filteredTasks = tasks.filter(function(task) {
-        if (currentFilter === "active") {
-            return !task.completed;
-        }
-
-        if (currentFilter === "completed") {
-            return task.completed;
-        }
-
-        return true;
-    });
-
-    if (filteredTasks.length === 0) {
-        const emptyMessage = document.createElement("li");
-        emptyMessage.textContent = "No tasks to display.";
-        taskList.appendChild(emptyMessage);
+cityInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        getWeather();
     }
+});
 
-    filteredTasks.forEach(function(task) {
-        const li = document.createElement("li");
-        li.className = "task-item";
-
-        if (task.completed) {
-            li.classList.add("completed");
-        }
-
-        // Create the checkbox
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = task.completed;
-        checkbox.dataset.id = task.id;
-        checkbox.className = "task-checkbox";
-        checkbox.setAttribute("aria-label", "Mark task completed");
-
-        // Create the task text
-        const span = document.createElement("span");
-        span.className = "task-text";
-        span.textContent = task.text;
-
-        // Create the Edit button
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.className = "edit-btn";
-        editBtn.dataset.action = "edit";
-        editBtn.dataset.id = task.id;
-
-        // Create the Delete button
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.className = "delete-btn";
-        deleteBtn.dataset.action = "delete";
-        deleteBtn.dataset.id = task.id;
-
-        // Add elements to the task
-        li.append(checkbox, span, editBtn, deleteBtn);
-        taskList.appendChild(li);
-    });
-
-    // Update the remaining task count
-    const remaining = tasks.filter(function(task) {
-        return !task.completed;
-    }).length;
-
-    taskCount.textContent =
-        remaining + (remaining === 1 ? " task remaining" : " tasks remaining");
-}
-
-// 6. Add a new task
-function addTask() {
-    const text = taskInput.value.trim();
-
-    if (text === "") {
-        alert("Please enter a task!");
-        return;
-    }
-
-    const task = {
-        id: Date.now().toString() + Math.random().toString(36).slice(2),
-        text: text,
-        completed: false
+function getWeatherDescription(code) {
+    const descriptions = {
+        0: ["Clear sky", "☀️"],
+        1: ["Mainly clear", "🌤️"],
+        2: ["Partly cloudy", "⛅"],
+        3: ["Overcast", "☁️"],
+        45: ["Foggy", "🌫️"],
+        48: ["Foggy", "🌫️"],
+        51: ["Light drizzle", "🌦️"],
+        53: ["Drizzle", "🌦️"],
+        55: ["Heavy drizzle", "🌧️"],
+        61: ["Light rain", "🌦️"],
+        63: ["Rain", "🌧️"],
+        65: ["Heavy rain", "🌧️"],
+        71: ["Light snow", "🌨️"],
+        73: ["Snow", "❄️"],
+        75: ["Heavy snow", "❄️"],
+        80: ["Rain showers", "🌦️"],
+        81: ["Rain showers", "🌧️"],
+        82: ["Heavy rain showers", "⛈️"],
+        95: ["Thunderstorm", "⛈️"]
     };
 
-    tasks.push(task);
-
-    saveTasks();
-    renderTasks();
-
-    taskInput.value = "";
-    taskInput.focus();
+    return descriptions[code] || ["Variable weather", "🌡️"];
 }
 
-// Click the Add Task button
-addBtn.addEventListener("click", addTask);
+async function getWeather() {
+    const city = cityInput.value.trim();
 
-// Press Enter to add a task
-taskInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        addTask();
-    }
-});
-
-// 7. Handle checkbox, Edit and Delete actions
-// This is called event delegation.
-taskList.addEventListener("click", function(event) {
-    const button = event.target.closest("button[data-action]");
-
-    if (!button || !taskList.contains(button)) {
+    if (!city) {
+        message.textContent = "Please enter a city name.";
+        weatherCard.hidden = true;
         return;
     }
 
-    const id = button.dataset.id;
-    const action = button.dataset.action;
+    searchBtn.disabled = true;
+    message.textContent = "Loading weather...";
+    weatherCard.hidden = true;
 
-    if (action === "delete") {
-        tasks = tasks.filter(function(task) {
-            return task.id !== id;
-        });
-    }
+    try {
+        // Step 1: Find the city's latitude and longitude
+        const geoUrl =
+            "https://geocoding-api.open-meteo.com/v1/search?name=" +
+            encodeURIComponent(city) + "&count=1&language=en&format=json";
 
-    if (action === "edit") {
-        const task = tasks.find(function(task) {
-            return task.id === id;
-        });
+        const geoResponse = await fetch(geoUrl);
 
-        if (!task) {
-            return;
+        if (!geoResponse.ok) {
+            throw new Error("Unable to connect to the weather service.");
         }
 
-        const newText = prompt("Edit your task:", task.text);
+        const geoData = await geoResponse.json();
 
-        if (newText !== null && newText.trim() !== "") {
-            task.text = newText.trim();
-        } else if (newText !== null) {
-            alert("Task cannot be empty!");
-            return;
-        } else {
-            return;
+        if (!geoData.results || geoData.results.length === 0) {
+            throw new Error("City not found. Please try another city.");
         }
+
+        const place = geoData.results[0];
+        const latitude = place.latitude;
+        const longitude = place.longitude;
+
+        // Step 2: Get current weather using the coordinates
+        const weatherUrl =
+            "https://api.open-meteo.com/v1/forecast?latitude=" +
+            latitude + "&longitude=" + longitude +
+            "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m";
+
+        const weatherResponse = await fetch(weatherUrl);
+
+        if (!weatherResponse.ok) {
+            throw new Error("Unable to fetch current weather.");
+        }
+
+        const weatherData = await weatherResponse.json();
+        const current = weatherData.current;
+
+        // Step 3: Display the weather information
+        const weather = getWeatherDescription(current.weather_code);
+
+        document.getElementById("cityName").textContent =
+            place.name + (place.country ? ", " + place.country : "");
+
+        document.getElementById("description").textContent = weather[0];
+
+        document.getElementById("weatherIcon").textContent =
+            current.is_day ? weather[1] : "🌙";
+
+        document.getElementById("temperature").textContent =
+            current.temperature_2m + " °C";
+
+        document.getElementById("feelsLike").textContent =
+            current.apparent_temperature + " °C";
+
+        document.getElementById("humidity").textContent =
+            current.relative_humidity_2m + "%";
+
+        document.getElementById("windSpeed").textContent =
+            current.wind_speed_10m + " km/h";
+
+        weatherCard.hidden = false;
+        message.textContent = "";
+
+    } catch (error) {
+        message.textContent = error.message ||
+            "Something went wrong. Please try again.";
+        weatherCard.hidden = true;
+
+    } finally {
+        searchBtn.disabled = false;
     }
-
-    saveTasks();
-    renderTasks();
-});
-
-// Handle checkbox changes
-taskList.addEventListener("change", function(event) {
-    if (!event.target.matches(".task-checkbox")) {
-        return;
-    }
-
-    const id = event.target.dataset.id;
-
-    const task = tasks.find(function(task) {
-        return task.id === id;
-    });
-
-    if (task) {
-        task.completed = event.target.checked;
-        saveTasks();
-        renderTasks();
-    }
-});
-
-// 8. Filter tasks: All, Active, Completed
-filterButtons.forEach(function(button) {
-    button.addEventListener("click", function() {
-        currentFilter = button.dataset.filter;
-
-        filterButtons.forEach(function(btn) {
-            btn.classList.remove("active");
-        });
-
-        button.classList.add("active");
-        renderTasks();
-    });
-});
-
-// 9. Display saved tasks when the page opens
-renderTasks();
+}
