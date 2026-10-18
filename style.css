@@ -1,30 +1,40 @@
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 body {
     font-family: Arial, sans-serif;
-    background: #eef2ff;
-    margin: 0;
-    padding: 30px 15px;
-    color: #1f2937;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 
 .container {
-    max-width: 600px;
-    margin: 30px auto;
-    padding: 25px;
+    width: 100%;
+    max-width: 500px;
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 h1 {
-    text-align: center;
-    color: #2563eb;
+    color: #263c74;
+    margin-bottom: 12px;
 }
 
-.input-section {
+.container > p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.search-box {
     display: flex;
     gap: 10px;
 }
@@ -33,102 +43,91 @@ input {
     flex: 1;
     min-width: 0;
     padding: 12px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 16px;
 }
 
 button {
-    padding: 10px 14px;
+    padding: 12px 18px;
     border: none;
+    background: #3867d6;
+    color: white;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
 }
 
-#addBtn {
-    background: #2563eb;
-    color: white;
+button:hover {
+    background: #244ba8;
 }
 
-.filters {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 22px 0;
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
-.filter-btn {
-    background: #e5e7eb;
+#message {
+    margin-top: 15px;
+    color: #444;
 }
 
-.filter-btn.active {
-    background: #2563eb;
-    color: white;
+.weather-card {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f1f5ff;
+    border-radius: 15px;
 }
 
-#taskList {
-    list-style: none;
-    padding: 0;
+.weather-card h2 {
+    color: #263c74;
 }
 
-.task-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+.weather-card h3 {
+    margin-top: 8px;
+    color: #555;
+    text-transform: capitalize;
 }
 
-.task-text {
-    flex: 1;
-    overflow-wrap: anywhere;
+#weatherIcon {
+    font-size: 45px;
+    margin: 10px;
 }
 
-.task-item.completed .task-text {
-    text-decoration: line-through;
-    color: #64748b;
-}
-
-.task-item input[type="checkbox"] {
-    flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.edit-btn {
-    background: #facc15;
-}
-
-.delete-btn {
-    background: #ef4444;
-    color: white;
-}
-
-#taskCount {
-    text-align: center;
-    color: #64748b;
+.weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
     margin-top: 20px;
 }
 
-@media (max-width: 450px) {
+.detail {
+    background: white;
+    padding: 15px 8px;
+    border-radius: 10px;
+}
+
+.detail span {
+    display: block;
+    color: #666;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.detail strong {
+    color: #263c74;
+    font-size: 17px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 400px) {
     .container {
-        padding: 16px;
+        padding: 20px;
     }
 
-    .input-section {
-        flex-wrap: wrap;
-    }
-
-    #addBtn {
-        flex: 1;
-    }
-
-    .task-item {
-        flex-wrap: wrap;
+    .search-box {
+        flex-direction: column;
     }
 }
